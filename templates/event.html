@@ -71,6 +71,7 @@ L.marker([{{e.location.lat}}, {{e.location.lng}}]).addTo(map);
     <td>
       {%if (i.client_id == g.client_id or i.user == current_user) and e.editable%}
       <form action="{{url_for('delete_attendee', atid=i.id)}}" method="POST">
+        <input type="hidden" name="client_id" value="{{g.client_id}}" />
         <button type="submit" class="btn btn-danger btn-xs">Odstranit</button>
       </form>
       {%endif%}

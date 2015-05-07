@@ -181,7 +181,7 @@ def get_client_id():
 
 @app.after_request
 def set_client_id(response):
-    response.set_cookie('client_id', g.client_id)
+    response.set_cookie('client_id', g.client_id, max_age=86400 * 60)
     return response
 
 class AttendForm(Form):
@@ -213,6 +213,8 @@ def event(slug=None):
 
 @app.route('/attendee/<atid>/delete', methods=['POST'])
 def delete_attendee(atid):
+    if request.form["client_id"] != g.client_id:
+        abort(403)
     a = Attendee.query.get(atid)
     if current_user != a.user and g.client_id != a.client_id:
         abort(403)
