@@ -1,0 +1,86 @@
+{%extends "base.html" %}
+{%import "bootstrap/wtf.html" as wtf%}
+
+{%block styles%}
+{{ super()}}
+{%if e.location.lat%}
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+{%endif%}
+{%endblock%}
+
+{%block title%}
+{{e.name}}
+{%endblock%}
+
+{%block text%}
+<h1>{{e.name}}</h1>
+<div class="row">
+  <div class="col-md-6">
+    <dl class="dl-horizontla">
+      <dt>Kdy?</dt>
+      <dd>{{e.date}}</dd>
+      <dt>Kde</dt>
+      <dd>
+        {%if e.location.url%}<a href="{{e.location.url}}">{%endif%}
+        <i>{{e.location.name}}</i><br/>
+        {%if e.location.url%}</a>{%endif%}
+        {{e.location.address|asmarkdown}}<br/>
+      </dd>
+    </dl>
+  </div>
+  {%if e.location.lat%}
+    <div class="col-md-6">
+      <div style="height:300px; width: 100%" id="mapa">
+        </div>
+    </div>
+    <script>
+var map = L.map('mapa').setView([{{e.location.lat}}, {{e.location.lng}}], 15);
+
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors', 
+    maxZoom: 18,
+}).addTo(map);
+
+L.marker([{{e.location.lat}}, {{e.location.lng}}]).addTo(map);
+    </script>
+  {%endif%}
+</div>
+<p>
+{{e.text|asmarkdown}}
+</p>
+{%if e.editable %}
+<h3>Zucastni se:</h3>
+{%else%}
+<h3>Zucastnili se:</h3>
+{%endif%}
+<table class="table table-stripped table-condensed">
+  <tr>
+    <th>Jmeno</th>
+    <th>Cas prihlaseni</th>
+    <th></th>
+  </tr>
+  {%for i in e.attendees%}
+  <tr>
+    <td>
+      {{i.display_name}}
+    </td>
+    <td>
+      {{i.timestamp}}
+    </td>
+    <td>
+      {%if (i.client_id == g.client_id or i.user == current_user) and e.editable%}
+      <form action="{{url_for('delete_attendee', atid=i.id)}}" method="POST">
+        <button type="submit" class="btn btn-danger btn-xs">Odstranit</button>
+      </form>
+      {%endif%}
+    </td>
+  </tr>
+  {%endfor%}
+</table>
+{%if e.editable %}
+<h4>Prihlasit ucast</h4>
+{{wtf.quick_form(attend_form, form_type="horizontal", 
+horizontal_columns=('md', 2, 4))}}
+{%endif%}
+{%endblock%}
