@@ -15,6 +15,7 @@ import base64
 import os
 import datetime
 import markdown
+from markupsafe import Markup
 
 db = SQLAlchemy()
 
@@ -135,7 +136,7 @@ admin = Admin(app)
 
 @app.template_filter()
 def asmarkdown(s):
-    return markdown.markdown(s)
+    return Markup(markdown.markdown(s))
 
 admin.add_view(ModelView(Location, db.session))
 admin.add_view(ModelView(Event, db.session))
